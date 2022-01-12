@@ -1,0 +1,16 @@
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+
+primitive_type = _{ number | boolean | string }
+number = { "number" }
+boolean = { "booloean" }
+string = { "string" }
+array = { primitive_type ~ "[]" }
+
+ts_type = _{ array | primitive_type }
+
+field_name = { (ASCII_ALPHA | "_" | "$") ~ (ASCII_ALPHANUMERIC | "_" | "-" | "$")*  }
+attribute = { ("readonly" | "const")? ~ field_name ~ ("?")? ~ ":" ~ ts_type ~ ";" }
+
+interface = { ("export")? ~ "interface" ~ field_name ~ "{" ~ (attribute)* ~ "}"  }
+
+declaration_file = { SOI ~ (interface)* ~ EOI }
