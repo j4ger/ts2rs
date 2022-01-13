@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod interface {
+mod interface_test {
 
     #[test]
     fn private_interface() {

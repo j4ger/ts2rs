@@ -2,7 +2,7 @@ WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
 
 primitive_type = _{ number | boolean | string }
 number = { "number" }
-boolean = { "booloean" }
+boolean = { "boolean" }
 string = { "string" }
 array = { primitive_type ~ "[]" }
 
