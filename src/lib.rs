@@ -10,15 +10,25 @@ use crate::interface::*;
 use proc_macro2::TokenStream;
 use proc_macro_error::{abort, proc_macro_error};
 
+fn parse_input(input: &str) -> TokenStream {
+    match parse_interface(input) {
+        Ok(interfaces) => {
+            let mut output = TokenStream::new();
+            for interface in interfaces {
+                output.extend(derive_struct_def(interface));
+            }
+            output.into()
+        }
+        Err(_) => {
+            abort!(proc_macro2::Span::call_site(), "Failed to parse interface")
+        }
+    }
+}
+
 #[proc_macro]
 pub fn raw_import(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = item.to_string();
-    let input = parse_interface(&input).unwrap();
-    let mut output = TokenStream::new();
-    for interface in input {
-        output.extend(derive_struct_def(interface));
-    }
-    output.into()
+    parse_input(&input).into()
 }
 
 #[proc_macro_error]
@@ -39,12 +49,7 @@ pub fn import(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
                     let mut contents = String::new();
                     let mut buffer = BufReader::new(file);
                     buffer.read_to_string(&mut contents).unwrap();
-                    let input = parse_interface(&contents).unwrap();
-                    let mut output = TokenStream::new();
-                    for interface in input {
-                        output.extend(derive_struct_def(interface));
-                    }
-                    output.into()
+                    parse_input(&contents).into()
                 }
                 Err(_) => {
                     abort!(span, "Failed to read {}", full_path.display());

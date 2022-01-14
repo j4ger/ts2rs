@@ -88,7 +88,9 @@ pub fn derive_struct_def(interface: TsInterface) -> TokenStream {
 "#,
         struct_name, attributes
     );
-    struct_def.parse().unwrap()
+    struct_def.parse().expect(
+        "Failed to generate struct definition, check if the interface has an invalid name or field",
+    )
 }
 
 #[cfg(test)]
