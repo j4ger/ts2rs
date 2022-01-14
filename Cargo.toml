@@ -2,6 +2,13 @@
 name = "ts2rs"
 version = "0.1.0"
 edition = "2021"
+authors = ["j4ger"]
+license = "MIT"
+description = "Macros that imports Typescript interfaces into Rust."
+category = ["development-tools::ffi", "parser-implementations", "web-programming"]
+repository = "https://github.com/j4ger/ts2rs"
+readme = "README.md"
+keywords = ["web", "typescript", "rust", "interface"]
 
 [lib]
 proc_macro = true
