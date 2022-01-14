@@ -11,11 +11,15 @@ raw_import! {
             */
         }
     // don't mind me
+    class SomeRandomGibberish {
 
+    }
+    console.log("Who left this random gibberish in the code?");
     interface Drink {
             name: string;
             price: number;
             ingredients?: string[];
+            best_served_with: Dish;
         } // ignore me
     // and me
 }
@@ -30,7 +34,10 @@ fn main() {
         name: "Coca-cola".to_string(),
         price: 2.0,
         ingredients: vec!["water".to_string(), "sugar".to_string()],
+        best_served_with: dish,
     };
-    println!("{}", dish.name);
-    println!("{}", drink.name);
+    println!(
+        "Enjoy a cup of {} while we prepare you tonight's dinner {}!",
+        drink.name, drink.best_served_with.name
+    );
 }

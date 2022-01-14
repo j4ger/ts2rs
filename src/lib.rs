@@ -4,8 +4,11 @@ extern crate pest_derive;
 
 mod interface;
 
+use std::{fs::File, io::prelude::*, io::BufReader, path::Path};
+
 use crate::interface::*;
 use proc_macro2::TokenStream;
+use proc_macro_error::{abort, proc_macro_error};
 
 #[proc_macro]
 pub fn raw_import(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -16,4 +19,37 @@ pub fn raw_import(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
         output.extend(derive_struct_def(interface));
     }
     output.into()
+}
+
+#[proc_macro_error]
+#[proc_macro]
+pub fn import(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let span = proc_macro2::Span::call_site();
+    let raw_input = item.to_string().trim_matches('"').to_string();
+    match raw_input.len() {
+        0 => {
+            abort!(span, "No source file provided")
+        }
+        _ => {
+            let path = Path::new(&raw_input);
+            let root = env!("CARGO_MANIFEST_DIR");
+            let full_path = Path::new(&root).join(&path);
+            match File::open(&full_path) {
+                Ok(file) => {
+                    let mut contents = String::new();
+                    let mut buffer = BufReader::new(file);
+                    buffer.read_to_string(&mut contents).unwrap();
+                    let input = parse_interface(&contents).unwrap();
+                    let mut output = TokenStream::new();
+                    for interface in input {
+                        output.extend(derive_struct_def(interface));
+                    }
+                    output.into()
+                }
+                Err(_) => {
+                    abort!(span, "Failed to read {}", full_path.display());
+                }
+            }
+        }
+    }
 }

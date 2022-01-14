@@ -5,18 +5,19 @@ primitive_type = _{ number | boolean | string }
 number = { "number" }
 boolean = { "boolean" }
 string = { "string" }
-array = { primitive_type ~ "[]" }
-
-ts_type = _{ array | primitive_type }
 
 identifier = @{ XID_START ~ XID_CONTINUE* }
-attribute = { ("readonly")? ~ identifier ~ ("?")? ~ ":" ~ ts_type ~ ";" }
+
+array = { (primitive_type | identifier) ~ "[]" }
+ts_type = _{ array | primitive_type | identifier }
+
+attribute = { ("readonly")? ~ identifier ~ ("?")? ~ ":" ~ (ts_type) ~ ";" }
 
 interface = { ("export")? ~ "interface" ~ identifier ~ "{" ~ (attribute)* ~ "}"  }
-general_block = _{ (!"{" ~ ANY)* ~ "{" ~ (!"}" ~ ANY)* ~ "}" }
+block_leader = _{ (!("{" | ";") ~ ANY)* }
+general_block = _{ block_leader ~ "{" ~ (!"}" ~ ANY)* ~ "}" }
+expression = _{ (!";" ~ ANY)* ~ ";"}
 
-block = _{ interface | general_block }
+element = _{ interface | general_block | expression }
 
-declaration_file = { SOI ~ (block)* ~ EOI }
-
-
+declaration_file = { SOI ~ (element)* ~ EOI }

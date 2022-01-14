@@ -6,34 +6,29 @@ use pest::{error::Error, iterators::Pair, Parser};
 use proc_macro2::TokenStream;
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum TsType {
-    Number,
-    String,
-    Boolean,
-    Array(Box<TsType>),
-}
-
-impl TsType {
-    fn to_rust_type(&self) -> String {
-        match self {
-            TsType::Number => "f64".to_string(),
-            TsType::String => "String".to_string(),
-            TsType::Boolean => "bool".to_string(),
-            TsType::Array(inner) => format!("Vec<{}>", inner.to_rust_type()),
-        }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq)]
 pub struct TsAttribute {
     pub name: String,
-    pub ts_type: TsType,
+    pub ts_type: String,
 }
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct TsInterface {
     pub name: String,
     pub attributes: Vec<TsAttribute>,
+}
+
+trait Capitalize {
+    fn capitalize(&self) -> String;
+}
+
+impl Capitalize for String {
+    fn capitalize(&self) -> String {
+        let mut c = self.chars();
+        match c.next() {
+            None => String::new(),
+            Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+        }
+    }
 }
 
 //TODO: use snafu for better error handling
@@ -62,12 +57,13 @@ pub fn parse_interface(input: &str) -> Result<Vec<TsInterface>, Error<Rule>> {
     Ok(output)
 }
 
-pub fn parse_type(pair: Pair<Rule>) -> TsType {
+pub fn parse_type(pair: Pair<Rule>) -> String {
     match pair.as_rule() {
-        Rule::number => TsType::Number,
-        Rule::string => TsType::String,
-        Rule::boolean => TsType::Boolean,
-        Rule::array => TsType::Array(Box::new(parse_type(pair.into_inner().next().unwrap()))),
+        Rule::number => "f64".to_string(),
+        Rule::string => "String".to_string(),
+        Rule::boolean => "bool".to_string(),
+        Rule::array => format!("Vec<{}>", parse_type(pair.into_inner().next().unwrap())),
+        Rule::identifier => pair.as_str().to_string().capitalize(),
         _ => panic!("Unknown type"),
     }
 }
@@ -78,11 +74,11 @@ pub fn derive_struct_def(interface: TsInterface) -> TokenStream {
         .into_iter()
         .map(|attribute| {
             let attribute_name = attribute.name;
-            let attribute_type = attribute.ts_type.to_rust_type();
+            let attribute_type = attribute.ts_type;
             format!("{}: {},", attribute_name, attribute_type)
         })
         .collect();
-    let struct_name = interface.name;
+    let struct_name = interface.name.capitalize();
     let struct_def = format!(
         r#"
         #[derive(Debug)]
@@ -97,7 +93,7 @@ pub fn derive_struct_def(interface: TsInterface) -> TokenStream {
 
 #[cfg(test)]
 mod interface_tests {
-    use crate::interface::{TsAttribute, TsInterface, TsType};
+    use crate::interface::{TsAttribute, TsInterface};
 
     const INTERFACE_TEST_STRING: &str = r#"
         interface Person {
@@ -117,19 +113,19 @@ mod interface_tests {
             attributes: vec![
                 TsAttribute {
                     name: "name".to_string(),
-                    ts_type: TsType::String,
+                    ts_type: "String".to_string(),
                 },
                 TsAttribute {
                     name: "age".to_string(),
-                    ts_type: TsType::Number,
+                    ts_type: "f64".to_string(),
                 },
                 TsAttribute {
                     name: "target".to_string(),
-                    ts_type: TsType::Boolean,
+                    ts_type: "bool".to_string(),
                 },
                 TsAttribute {
                     name: "friends".to_string(),
-                    ts_type: TsType::Array(Box::new(TsType::String)),
+                    ts_type: "Vec<String>".to_string(),
                 },
             ],
         };
@@ -143,6 +139,6 @@ mod interface_tests {
             .remove(0);
         let struct_def = super::derive_struct_def(ts_interface);
         println!("{}", struct_def);
-        // assert!(false);
+        assert!(false);
     }
 }
