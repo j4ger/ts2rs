@@ -3,14 +3,21 @@ use ts2rs::raw_import;
 raw_import! {
     export interface Dish {
             name: string;
-            price: number;
+            readonly price: number;
+            // apologies for cutting in
             ingredients: string[];
+            /*
+             sorry for taking up so much space
+            */
         }
+    // don't mind me
+
     interface Drink {
             name: string;
             price: number;
             ingredients?: string[];
-        }
+        } // ignore me
+    // and me
 }
 
 fn main() {

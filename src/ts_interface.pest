@@ -1,5 +1,5 @@
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
-COMMENT = _{ "//" ~ (!"\n" ~ ANY)* }
+COMMENT = _{ ("/*" ~ (!"*/" ~ ANY)* ~ "*/") | ("//" ~ (!"\n" ~ ANY)*) }
 
 primitive_type = _{ number | boolean | string }
 number = { "number" }
@@ -10,8 +10,13 @@ array = { primitive_type ~ "[]" }
 ts_type = _{ array | primitive_type }
 
 identifier = @{ XID_START ~ XID_CONTINUE* }
-attribute = { ("readonly" | "const")? ~ identifier ~ ("?")? ~ ":" ~ ts_type ~ ";" }
+attribute = { ("readonly")? ~ identifier ~ ("?")? ~ ":" ~ ts_type ~ ";" }
 
 interface = { ("export")? ~ "interface" ~ identifier ~ "{" ~ (attribute)* ~ "}"  }
+general_block = _{ (!"{" ~ ANY)* ~ "{" ~ (!"}" ~ ANY)* ~ "}" }
 
-declaration_file = { SOI ~ (interface)* ~ EOI }
+block = _{ interface | general_block }
+
+declaration_file = { SOI ~ (block)* ~ EOI }
+
+
