@@ -9,9 +9,9 @@ array = { primitive_type ~ "[]" }
 
 ts_type = _{ array | primitive_type }
 
-field_name = { (ASCII_ALPHA | "_" | "$") ~ (ASCII_ALPHANUMERIC | "_" | "-" | "$")*  }
-attribute = { ("readonly" | "const")? ~ field_name ~ ("?")? ~ ":" ~ ts_type ~ ";" }
+identifier = @{ XID_START ~ XID_CONTINUE* }
+attribute = { ("readonly" | "const")? ~ identifier ~ ("?")? ~ ":" ~ ts_type ~ ";" }
 
-interface = { ("export")? ~ "interface" ~ field_name ~ "{" ~ (attribute)* ~ "}"  }
+interface = { ("export")? ~ "interface" ~ identifier ~ "{" ~ (attribute)* ~ "}"  }
 
 declaration_file = { SOI ~ (interface)* ~ EOI }
