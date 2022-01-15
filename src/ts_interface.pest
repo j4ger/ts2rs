@@ -7,11 +7,12 @@ boolean = { "boolean" }
 string = { "string" }
 
 identifier = @{ XID_START ~ XID_CONTINUE* }
+field_name = { identifier ~ ("?")? }
 
 array = { (primitive_type | identifier) ~ "[]" }
 ts_type = _{ array | primitive_type | identifier }
 
-attribute = { ("readonly")? ~ identifier ~ ("?")? ~ ":" ~ (ts_type) ~ ";" }
+attribute = { ("readonly")? ~ field_name ~ ":" ~ (ts_type) ~ ";" }
 
 interface = { ("export")? ~ "interface" ~ identifier ~ "{" ~ (attribute)* ~ "}"  }
 block_leader = _{ (!("{" | ";") ~ ANY)* }

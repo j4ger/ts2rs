@@ -33,7 +33,7 @@ fn main() {
     let drink = Drink {
         name: "Coca-cola".to_string(),
         price: 2.0,
-        ingredients: vec!["water".to_string(), "sugar".to_string()],
+        ingredients: Some(vec!["water".to_string(), "sugar".to_string()]),
         best_served_with: dish,
     };
     println!(

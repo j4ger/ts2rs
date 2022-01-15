@@ -45,8 +45,12 @@ pub fn parse_interface(input: &str) -> Result<Vec<TsInterface>, Error<Rule>> {
         let interface_name = interface_inner.next().unwrap().as_str().to_string();
         for attribute in interface_inner.into_iter() {
             let mut attribute_inner = attribute.into_inner();
-            let name = attribute_inner.next().unwrap().as_str().to_string();
-            let ts_type = parse_type(attribute_inner.next().unwrap());
+            let mut name = attribute_inner.next().unwrap().as_str().to_string();
+            let mut ts_type = parse_type(attribute_inner.next().unwrap());
+            if name.ends_with("?") {
+                name = name.trim_end_matches("?").to_string();
+                ts_type = format!("Option<{}>", ts_type);
+            }
             attributes.push(TsAttribute { name, ts_type });
         }
         output.push(TsInterface {
@@ -102,7 +106,7 @@ mod interface_tests {
             name: string;
             age: number;
             target: boolean;
-            friends: string[];
+            friends?: string[];
         }
     "#;
 
@@ -127,7 +131,7 @@ mod interface_tests {
                 },
                 TsAttribute {
                     name: "friends".to_string(),
-                    ts_type: "Vec<String>".to_string(),
+                    ts_type: "Option<Vec<String>>".to_string(),
                 },
             ],
         };
