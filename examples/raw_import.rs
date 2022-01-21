@@ -4,13 +4,11 @@ raw_import! {
     export interface Dish {
             name: string;
             readonly price: number;
-            // apologies for cutting in
             ingredients: string[];
             /*
              sorry for taking up so much space
             */
-        }
-    // don't mind me
+        } /** derive: PartialEq; **/
     class SomeRandomGibberish {
 
     }
@@ -20,8 +18,8 @@ raw_import! {
             price: number;
             ingredients?: string[];
             best_served_with: Dish;
-        } // ignore me
-    // and me
+            salt?:boolean; /** skip; **/ // Who puts salt in a drink?
+        }
 }
 
 fn main() {

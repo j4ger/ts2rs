@@ -24,16 +24,112 @@
 //! # Usage
 //! See the [`import!`] macro.
 //!
-//! # Ignored Sections
+//! # Cargo Features
 //!
-//! Comments are ignored by default.
-//! A comment-based mapping attribution will be added in the future.
+//! ## `serde`
+//! By default, all interfaces are imported as structs that only derive `Debug`.
 //!
-//! Only interface definitions will be extracted, so any expressions and other sorts of code blocks will be ignored.
+//! Enabling this feature will make all structs derive `serde::Serialize` and `serde::Deserialize` by default.
 //!
-//! Interfaces with generics are not supported yet and will be ignored.
+//! For more derive options, check out the [derive option](#derive).
 //!
+//! # Import Options
+//! Use comments that start with `/**` and end with `**/` to specify options for the import.
+//! Multiple options can reside in the same comment block, each ending with a semicolon `;`.
 //!
+//! ## Rename
+//! Use `/** rename: <name>; **/` to rename the field/interface to `<name>`.
+//!
+//! ### Example
+//! ```typescript
+//! interface Fries {
+//!   favorite: boolean; /** rename: favourite; **/
+//!   price: number;
+//! } /** rename: Chips; **/
+//! ```
+//! This would result in the following struct definition:
+//! ```rust
+//! #[derive(Debug)]
+//! pub struct Chips {
+//!   favourite: bool,
+//!   price: f64,
+//! }
+//! ```
+//!
+//! ## Retype
+//! Use `/** retype: <type>; **/` to retype the field to `<type>`.
+//!
+//! ### Example
+//! ```typescript
+//! interface Chocolate {
+//!   price: number; /** retype: i32; **/
+//! }
+//! ```
+//! This would result in the following struct definition:
+//! ```rust
+//! #[derive(Debug)]
+//! pub struct Chocolate {
+//!   price: i32,
+//! }
+//! ```
+//!
+//! ## Skip
+//! Use `/** skip; **/` to skip the field/interface.
+//!
+//! ### Example
+//! ```typescript
+//! interface User {
+//!   id: number;
+//!   theme: string; /** skip; **/ // backend doesn't care about this field
+//! }
+//! interface Advertisement {
+//!   id: number;
+//!   url: string;
+//! } /** skip; **/ // backend doesn't care about this interface
+//! ```
+//! This would result in the following struct definition:
+//! ```rust
+//! #[derive(Debug)]
+//! pub struct User {
+//!   id: f64,
+//! }
+//! ```
+//!
+//! ## Derive
+//! Use `/** derive: <derive>; **/` to derive a trait for the interface.
+//!
+//! ### Example
+//! ```typescript
+//! interface User {
+//!   id: number;
+//! } /** derive: PartialEq; derive: Eq; **/
+//! ```
+//! This would result in the following struct definition:
+//! ```rust
+//! #[derive(Debug, PartialEq, Eq)]
+//! pub struct User {
+//!   id: f64,
+//! }
+//! ```
+//!
+//! ## Skip Derive Serde
+//! Use `/** skip_derive_serde; **/` to skip the `serde` derives for the interface.
+//!
+//! ### Example
+//! ```typescript
+//! interface User {
+//!   id: number;
+//! } /** skip_derive_serde; **/
+//! ```
+//! This would result in the following struct definition:
+//! ```rust
+//! #[derive(Debug)]
+//! pub struct User {
+//!   id: f64,
+//! }
+//! ```
+//!
+
 extern crate pest;
 #[macro_use]
 extern crate pest_derive;
@@ -63,7 +159,7 @@ fn parse_input(input: &str) -> TokenStream {
 
 /// Imports Typescript interfaces from raw text.
 /// # Examples
-/// ```
+/// ```rust
 /// # use ts2rs::raw_import;
 /// raw_import!{
 ///     interface File {
@@ -76,7 +172,7 @@ fn parse_input(input: &str) -> TokenStream {
 ///```
 ///
 /// This will result in the following struct definition:
-/// ```
+/// ```rust
 /// pub struct File {
 ///     pub name: String,
 ///     pub size: f64,
@@ -93,7 +189,7 @@ pub fn raw_import(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
 /// Imports Typescript interfaces from a file.
 /// # Examples
-/// ```
+/// ```rust
 /// # use ts2rs::import;
 /// import!("path/to/file.ts");
 /// ```

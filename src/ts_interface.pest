@@ -1,5 +1,14 @@
 WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
-COMMENT = _{ ("/*" ~ (!"*/" ~ ANY)* ~ "*/") | ("//" ~ (!"\n" ~ ANY)*) }
+COMMENT = _{ (!"/**" ~ ("/*" ~ (!"*/" ~ ANY)* ~ "*/")) | ("//" ~ (!"\n" ~ ANY)*) }
+
+valid_option = _{ rename_option | retype_option | skip_option | skip_derive_serde_option | derive_option }
+rename_option = { "rename:" ~ identifier }
+retype_option = { "retype:" ~ identifier }
+skip_option = { "skip" }
+skip_derive_serde_option = { "skip_derive_serde" }
+derive_option = { "derive:" ~ identifier }
+
+option = { "/**" ~ (valid_option ~ ";")* ~ "**/" }
 
 primitive_type = _{ number | boolean | string }
 number = { "number" }
@@ -7,16 +16,20 @@ boolean = { "boolean" }
 string = { "string" }
 
 identifier = @{ XID_START ~ XID_CONTINUE* }
+
 field_name = { identifier ~ ("?")? }
 
 array = { (primitive_type | identifier) ~ "[]" }
+
 ts_type = _{ array | primitive_type | identifier }
 
-attribute = { ("readonly")? ~ field_name ~ ":" ~ (ts_type) ~ ";" }
+attribute = { ("readonly")? ~ field_name ~ ":" ~ ts_type ~ ";" ~ option? }
 
-interface = { ("export")? ~ "interface" ~ identifier ~ "{" ~ (attribute)* ~ "}"  }
+interface = { ("export")? ~ "interface" ~ identifier ~ "{" ~ (attribute)* ~ "}" ~ option?  }
+
 block_leader = _{ (!("{" | ";") ~ ANY)* }
 general_block = _{ block_leader ~ "{" ~ (!"}" ~ ANY)* ~ "}" }
+
 expression = _{ (!";" ~ ANY)* ~ ";"}
 
 element = _{ interface | general_block | expression }
