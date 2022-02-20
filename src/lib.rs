@@ -136,7 +136,7 @@ extern crate pest_derive;
 
 mod interface;
 
-use std::{fs::File, io::prelude::*, io::BufReader, path::Path};
+use std::{env, fs::File, io::prelude::*, io::BufReader, path::Path};
 
 use crate::interface::*;
 use proc_macro2::TokenStream;
@@ -205,7 +205,8 @@ pub fn import(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
         }
         _ => {
             let path = Path::new(&raw_input);
-            let root = env!("CARGO_MANIFEST_DIR");
+            let root = env::var("CARGO_MANIFEST_DIR")
+                .expect("Failed to get CARGO_MANIFEST_DIR environment variable");
             let full_path = Path::new(&root).join(&path);
             match File::open(&full_path) {
                 Ok(file) => {
