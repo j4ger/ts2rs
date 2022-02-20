@@ -1,4 +1,4 @@
-#i[derive(Parser)]
+#[derive(Parser)]
 #[grammar = "ts_interface.pest"]
 pub struct TsInterfaceParser;
 
