@@ -1,6 +1,6 @@
 [package]
 name = "ts2rs"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["j4ger"]
 license = "MIT"

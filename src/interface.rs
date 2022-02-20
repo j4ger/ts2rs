@@ -1,4 +1,4 @@
-#[derive(Parser)]
+#i[derive(Parser)]
 #[grammar = "ts_interface.pest"]
 pub struct TsInterfaceParser;
 
@@ -34,10 +34,8 @@ impl Capitalize for String {
 }
 
 pub fn parse_interface(input: &str) -> Result<Vec<TsInterface>, Error<Rule>> {
-    println!("{}", input);
     let mut output: Vec<TsInterface> = Vec::new();
     let mut interfaces = TsInterfaceParser::parse(Rule::declaration_file, input)?;
-    println!("interfaces: {:?}", interfaces);
     let interfaces = interfaces.next().unwrap().into_inner();
     let interfaces = interfaces
         .filter(|pair| pair.as_rule() == Rule::interface)
